@@ -8,16 +8,6 @@ struct MatrixArray<const LEN: usize> {
 }
 
 impl<const LEN: usize> MatrixArray<LEN> {
-    fn zeroed() -> Self {
-        MatrixArray {
-            entries: [0.0; LEN],
-        }
-    }
-
-    fn is_leading(&self) -> bool {
-        todo!()
-    }
-
     fn iter(&self) -> Iter<'_, f32> {
         self.entries.iter()
     }
@@ -170,16 +160,9 @@ impl<'a, const NUM_ROWS: usize, const NUM_COLS: usize> Iterator
     }
 }
 
-fn main() {
-    println!("Hello, world!");
-
-    let mut matrix = Matrix::new_row_major([
-        //
-        [1.0, 2.0, 1.0],
-        [2.0, 1.0, 1.0],
-        [2.0, 1.0, 1.0],
-    ]);
-
+fn gaussian_eliminate<const NUM_ROWS: usize, const NUM_COLS: usize>(
+    matrix: &mut Matrix<NUM_ROWS, NUM_COLS>,
+) {
     let mut current_row = 0;
     let mut current_col = 0;
     let mut leading_cols = Vec::new();
@@ -188,13 +171,14 @@ fn main() {
         dbg!(&matrix);
 
         // Find the first column number >= current_row which contains a non-zero entry
-        // in rows p..n
+        // in rows current_row..n
         let mut non_zero_row = None;
         for col in current_col..matrix.num_cols() {
             non_zero_row = matrix
                 .col(col)
                 .skip(current_row)
-                .position(|entry| entry != 0.0);
+                .position(|entry| entry != 0.0)
+                .map(|non_zero_row| non_zero_row + current_row);
 
             if non_zero_row.is_some() {
                 current_col = col;
@@ -205,7 +189,7 @@ fn main() {
         }
 
         let Some(non_zero_row) = non_zero_row else {
-            panic!("stop");
+            return;
         };
 
         dbg!(current_row);
@@ -240,7 +224,7 @@ fn main() {
 
             // R_i |-> R_i - e_(i, current_col) * R_current_row
             // => e_(i, current_col) = e_(i, current_col) - e_(i, current_col) * e_(current_row, current_col)
-            // => e_(i, current_col) = e_(i, current_col) - e_(i, current_col)
+            // => e_(i, current_col) = e_(i, current_col) - e_(i, current_col) * 1
             // => e_(i, current_col) = 0
             matrix
                 .ero(i, -matrix[(i, current_col)], current_row)
@@ -249,9 +233,23 @@ fn main() {
         }
 
         if current_row == matrix.num_rows() - 1 || current_col == matrix.num_cols() - 1 {
-            panic!("stop")
+            return;
         }
 
         current_row += 1;
     }
+}
+
+fn main() {
+    println!("Hello, world!");
+
+    let mut matrix = Matrix::new_row_major([
+        //
+        [1.0, 2.0, 1.0],
+        [2.0, 1.0, 1.0],
+        [2.0, 1.0, 1.0],
+        [6.0, 12.0, 10.0],
+    ]);
+
+    gaussian_eliminate(&mut matrix);
 }
