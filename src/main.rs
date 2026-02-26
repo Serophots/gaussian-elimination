@@ -70,18 +70,12 @@ impl<const NUM_ROWS: usize, const NUM_COLS: usize> Matrix<NUM_ROWS, NUM_COLS> {
         let row_i = rows.next().unwrap();
         let row_j = rows.next().unwrap();
 
-        // i = i + j
         for (entry_i, entry_j) in Iterator::zip(row_i.iter_mut(), row_j.iter_mut()) {
+            // i = i + j
             *entry_i += *entry_j;
-        }
-
-        // j = i - j
-        for (entry_i, entry_j) in Iterator::zip(row_i.iter_mut(), row_j.iter_mut()) {
+            // j = i - j
             *entry_j = *entry_i - *entry_j;
-        }
-
-        // i = i - j
-        for (entry_i, entry_j) in Iterator::zip(row_i.iter_mut(), row_j.iter_mut()) {
+            // i = i - j
             *entry_i -= *entry_j;
         }
 
