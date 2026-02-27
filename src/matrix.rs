@@ -48,12 +48,20 @@ impl<const NUM_ROWS: usize, const NUM_COLS: usize> Matrix<NUM_ROWS, NUM_COLS> {
         }
     }
 
-    pub fn col<'a>(&'a self, col_ix: usize) -> MatrixColIter<'a, NUM_ROWS, NUM_COLS> {
+    pub fn col_iter<'a>(&'a self, col_ix: usize) -> MatrixColIter<'a, NUM_ROWS, NUM_COLS> {
         MatrixColIter {
             matrix: self,
             col_ix,
             row_ix: 0,
         }
+    }
+
+    pub fn col(&self, col_ix: usize) -> [f32; NUM_ROWS] {
+        let mut col = [0.0; NUM_ROWS];
+        for (i, entry) in self.col_iter(col_ix).enumerate() {
+            col[i] = entry;
+        }
+        col
     }
 
     pub fn row(&self, row_ix: usize) -> &MatrixArray<NUM_COLS> {
