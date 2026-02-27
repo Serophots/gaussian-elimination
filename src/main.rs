@@ -9,9 +9,11 @@ pub enum LinearSystemSolution<const NUM_ROWS: usize> {
     Many,
 }
 
+/// Transforms the matrix into Reduced Row Echelon Form.
+/// Returns a list of leading column indicies.
 fn gaussian_eliminate<const NUM_ROWS: usize, const NUM_COLS: usize>(
     matrix: &mut Matrix<NUM_ROWS, NUM_COLS>,
-) -> LinearSystemSolution<NUM_ROWS> {
+) -> Vec<usize> {
     let mut current_row = 0;
     let mut current_col = 0;
     let mut leading_cols = Vec::new();
@@ -82,6 +84,15 @@ fn gaussian_eliminate<const NUM_ROWS: usize, const NUM_COLS: usize>(
         current_row += 1;
     }
 
+    leading_cols
+}
+
+/// Solves a linear system
+fn solve_linear_system<const NUM_ROWS: usize, const NUM_COLS: usize>(
+    matrix: &mut Matrix<NUM_ROWS, NUM_COLS>,
+) -> LinearSystemSolution<NUM_ROWS> {
+    let leading_cols = gaussian_eliminate(matrix);
+
     if leading_cols
         .last()
         .map(|last| *last == matrix.num_cols() - 1)
@@ -122,6 +133,6 @@ fn main() {
         [-2.0, 1.0, 2.0, -3.0],
     ]);
 
-    let solution = gaussian_eliminate(&mut matrix);
+    let solution = solve_linear_system(&mut matrix);
     println!("Solved: {:?}", solution);
 }
