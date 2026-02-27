@@ -1,51 +1,15 @@
 use std::{
-    ops::{Deref, DerefMut, Index, IndexMut},
-    slice::{GetDisjointMutError, Iter, IterMut},
+    ops::{Index, IndexMut},
+    slice::GetDisjointMutError,
 };
 
-pub struct MatrixArray<const LEN: usize> {
-    pub entries: [f32; LEN],
-}
-
-impl<const LEN: usize> MatrixArray<LEN> {
-    pub fn iter(&self) -> Iter<'_, f32> {
-        self.entries.iter()
-    }
-
-    pub fn iter_mut(&mut self) -> IterMut<'_, f32> {
-        self.entries.iter_mut()
-    }
-}
-
-impl<const LEN: usize> DerefMut for MatrixArray<LEN> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.entries
-    }
-}
-
-impl<const LEN: usize> Deref for MatrixArray<LEN> {
-    type Target = [f32; LEN];
-
-    fn deref(&self) -> &Self::Target {
-        &self.entries
-    }
-}
-
-impl<const LEN: usize> std::fmt::Debug for MatrixArray<LEN> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_list().entries(self.entries.iter()).finish()
-    }
-}
-
 pub struct Matrix<const NUM_ROWS: usize, const NUM_COLS: usize> {
-    pub row_major: [MatrixArray<NUM_COLS>; NUM_ROWS],
+    pub row_major: [[f32; NUM_COLS]; NUM_ROWS],
 }
 
 impl<const NUM_ROWS: usize, const NUM_COLS: usize> Matrix<NUM_ROWS, NUM_COLS> {
     pub fn new_row_major(row_major: [[f32; NUM_COLS]; NUM_ROWS]) -> Self {
-        Matrix {
-            row_major: row_major.map(|row| MatrixArray { entries: row }),
-        }
+        Matrix { row_major }
     }
 
     pub fn col_iter<'a>(&'a self, col_ix: usize) -> MatrixColIter<'a, NUM_ROWS, NUM_COLS> {
@@ -64,11 +28,11 @@ impl<const NUM_ROWS: usize, const NUM_COLS: usize> Matrix<NUM_ROWS, NUM_COLS> {
         col
     }
 
-    pub fn row(&self, row_ix: usize) -> &MatrixArray<NUM_COLS> {
+    pub fn row(&self, row_ix: usize) -> &[f32; NUM_COLS] {
         &self.row_major[row_ix]
     }
 
-    pub fn row_mut(&mut self, row_ix: usize) -> &mut MatrixArray<NUM_COLS> {
+    pub fn row_mut(&mut self, row_ix: usize) -> &mut [f32; NUM_COLS] {
         &mut self.row_major[row_ix]
     }
 
